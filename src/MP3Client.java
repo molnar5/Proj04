@@ -1,10 +1,15 @@
 import java.io.*;
 import java.net.Socket;
+import java.util.Scanner;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 
 
 //hello this is a test message!!
 //hello!
+
+//Annah Aunger
 
 /**
  * An MP3 Client to request .mp3 files from a server and receive them over the socket connection.
@@ -13,6 +18,14 @@ public class MP3Client {
 
     public static void main(String[] args) {
         //TODO: Implement main
+
+        Socket serverConnection = null;
+        Scanner inUser = new Scanner(System.in);
+        Scanner inServer = null;
+        PrintWriter outServer;
+        String response;
+
+
     }
 }
 
@@ -22,12 +35,13 @@ public class MP3Client {
  * server responses. The threads you create in MP3Server will be constructed using
  * instances of this class.
  */
-final class ResponseListener implements Runnable {
+final class ResponseListener implements Runnable{
 
     private ObjectInputStream ois;
 
     public ResponseListener(Socket clientSocket) {
         //TODO: Implement constructor
+
     }
 
     /**
