@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.lang.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * An MP3 Client to request .mp3 files from a server and receive them over the socket connection.
@@ -36,7 +38,7 @@ public class MP3Client {
                 System.out.println(" *  Exit");
                 System.out.println("=================================");
 
-                System.out.println("Please enter an option number or 'exit' to leave." );
+                System.out.println("Please enter an option number or 'exit' to leave.");
 
                 outServer.println(scan.nextLine());
 
@@ -53,12 +55,12 @@ public class MP3Client {
                 if (response == null) {
                     //response invalid
                     System.out.println("Response invalid.");
-                    System.out.println("Please enter an option number or 'exit' to leave." );
+                    System.out.println("Please enter an option number or 'exit' to leave.");
 
-                } else if (response.length() == 0 ) {
+                } else if (response.length() == 0) {
                     //response invalid
                     System.out.println("Response invalid.");
-                    System.out.println("Please enter an option number or 'exit' to leave." );
+                    System.out.println("Please enter an option number or 'exit' to leave.");
 
                 } else if (response.equals("1")) {
                     //they want to see the songs
@@ -74,13 +76,29 @@ public class MP3Client {
                     outServer.println(showList);
 
                     ResponseListener listThread = new ResponseListener(serverConnection);
-                    new Thread (listThread).start();
+                    new Thread(listThread).start();
+                    //TODO: figure out how to find out if the thread is still running not sure if below is applicable
+                    // it may need to go in some sort of loop where it waits a certain amount of time then checks again
+                    // or a while loop?
 
-                    if (!(listThread.isAlive())) { //the thread has finished
-                        //close the socket
-                        serverConnection.close();
+                    Thread t = Thread.currentThread();
 
+                    while(t.isAlive()) {
+                        try {
+                            //Thread.sleep(100);
+                            TimeUnit.SECONDS.sleep(1); // not sure if this is the best option... I have something different written in the next block
+                            if (!t.isAlive()) {
+                                serverConnection.close();
+                            }
+                        } catch (InterruptedException g) {
+                            g.printStackTrace();
+                        }
                     }
+
+                    /*while (!t.isAlive()) {
+                        serverConnection.close();
+                        break;
+                    }*/
 
                 } else if (response.equals("2")) {
 
@@ -105,11 +123,22 @@ public class MP3Client {
                     //new Thread(clientHandler).start();
 
                     ResponseListener downloadThread = new ResponseListener(serverConnection);
-                    new Thread (downloadThread).start();
 
-                    if (!(downloadThread.isAlive())) { //the thread has finished
-                        //close the socket
-                        serverConnection.close();
+                    new Thread(downloadThread).start();
+
+
+                    //TODO: figure out how to find out if the thread is still running not sure if below is applicable
+
+                    Thread t = Thread.currentThread();
+
+                    try {
+                        while (t.isAlive()) {
+                            //do nothing. let it run until it is done
+                        }
+                    } finally {
+                        if (!(t.isAlive())) {
+                            serverConnection.close();
+                        }
                     }
 
                 } else if (response.equalsIgnoreCase("exit")) {
@@ -118,7 +147,7 @@ public class MP3Client {
                 } else {
                     //input must be invalid
                     System.out.println("Response invalid.");
-                    System.out.println("Please enter an option number or 'exit' to leave." );
+                    System.out.println("Please enter an option number or 'exit' to leave.");
                 }
             } while (scan.hasNextLine());
 
@@ -128,23 +157,24 @@ public class MP3Client {
 
             outServer.close();
 
-    } catch (IOException e) {
-        System.out.println("A file input/output exception occurred");
+        } catch (IOException e) {
+            System.out.println("A file input/output exception occurred");
 
-        System.out.printf("Exception message: %s\n", e.getMessage());
+            System.out.printf("Exception message: %s\n", e.getMessage());
 
-        if (inServer != null) {
-            inServer.close();
-        } //end if
+            if (inServer != null) {
+                inServer.close();
+            } //end if
 
-        if (serverConnection != null) {
-            try {
-                serverConnection.close();
-            } catch (IOException i) {
-                i.printStackTrace();
-            } //end try catch
-        } //end if
-    } //end try catch
+            if (serverConnection != null) {
+                try {
+                    serverConnection.close();
+                } catch (IOException i) {
+                    i.printStackTrace();
+                } //end try catch
+            } //end if
+        } //end try catch
+    }
 }
 
 
@@ -287,5 +317,4 @@ final class ResponseListener implements Runnable {
             }
         } // end finally
     }
-}
 }
