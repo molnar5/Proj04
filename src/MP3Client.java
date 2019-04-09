@@ -70,7 +70,9 @@ public class MP3Client {
                     // to listen for the server's response. Wait for this thread to finish, then close
                     // the socket and continue with the client.
 
+
                     outServer.println(showList);
+
                     ResponseListener listThread = new ResponseListener(serverConnection);
                     new Thread (listThread).start();
 
@@ -104,7 +106,7 @@ public class MP3Client {
                     ResponseListener downloadThread = new ResponseListener(serverConnection);
                     new Thread (downloadThread).start();
 
-                    if (!downloadThread.isAlive()) { //the thread has finished
+                    if (!(downloadThread.isAlive())) { //the thread has finished
                         //close the socket
                         serverConnection.close();
                     }
@@ -141,8 +143,6 @@ public class MP3Client {
                 i.printStackTrace();
             } //end try catch
         } //end if
-
-        return;
     } //end try catch
 }
 
@@ -153,7 +153,6 @@ public class MP3Client {
  * instances of this class.
  */
 final class ResponseListener implements Runnable {
-
 
     private ObjectInputStream ois;
 
@@ -229,7 +228,7 @@ final class ResponseListener implements Runnable {
                     break;
 
                 } else {
-                    //TODO: this is not a songHeaderObject
+                    //TODO: this is not a songHeaderObject what to do now
                     break;
                 }
 
