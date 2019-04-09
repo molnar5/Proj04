@@ -91,6 +91,7 @@ final class ClientHandler implements Runnable {
             clientRequest = (SongRequest) inputStream.readObject();
 
             if (clientRequest.isDownloadRequest()) {
+
                 String songName = clientRequest.getSongName();
                 String artistName = clientRequest.getArtistName();
 

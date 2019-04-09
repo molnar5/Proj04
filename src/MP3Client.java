@@ -21,7 +21,7 @@ public class MP3Client {
         String response;
 
         try {
-            serverConnection = new Socket("localhost", 423);
+            serverConnection = new Socket("localhost", 9478);
 
             inServer = new Scanner(serverConnection.getInputStream());
 
@@ -80,7 +80,6 @@ public class MP3Client {
                 System.out.println("Please enter an option number or 'exit' to leave." );
 
             } else if (response.equals("1")) {
-
                 //they want to see the songs
                 SongRequest showList = new SongRequest(false);
 
@@ -89,6 +88,9 @@ public class MP3Client {
                 // After sending a request to the server, create a Thread with a ResponseListener
                 // to listen for the server's response. Wait for this thread to finish, then close
                 // the socket and continue with the client.
+
+                outServer.println(showList);
+
 
             } else if (response.equals("2")) {
 
@@ -105,6 +107,8 @@ public class MP3Client {
                 // After sending a request to the server, create a Thread with a ResponseListener
                 // to listen for the server's response. Wait for this thread to finish, then close
                 // the socket and continue with the client.
+
+                outServer.println(songRequest);
 
             } else if (response.equalsIgnoreCase("exit")) {
                 // stop the program
@@ -179,7 +183,6 @@ final class ResponseListener implements Runnable {
         // you will need to receive all of the bytes from the output stream and write it to a
         // file in the savedSongs directory with the name
 
-
         try {
             //Scanner scan = new Scanner(ois);
 
@@ -192,35 +195,43 @@ final class ResponseListener implements Runnable {
                     header = ois.readObject();
 
                 } else if (header instanceof SongHeaderMessage){
-                    if (((SongHeaderMessage) header).getFileSize() != -1) { //there are bytes to be written
+                    if (((SongHeaderMessage) header).isSongHeader()) { // is is a download request
 
-                        //format: SongHeaderMessage(true, songName, artistName, byteArray.length);
+                        if (((SongHeaderMessage) header).getFileSize() != -1) { //there are bytes to be written
 
-                        // you will need to receive all of the bytes from the output stream and write it to a
-                        // file in the savedSongs directory with the name
-                        //“<Artist> - <Song name>.mp3”
+                            //format: SongHeaderMessage(true, songName, artistName, byteArray.length);
 
-                        String filename = String.format("<%s> - <%s>.mp3",((SongHeaderMessage) header).getArtistName(),
-                                ((SongHeaderMessage) header).getSongName());
+                            // you will need to receive all of the bytes from the output stream and write it to a
+                            // file in the savedSongs directory with the name
+                            //“<Artist> - <Song name>.mp3”
 
-                        byte[] songBytes = ois.readAllBytes();
+                            String filename = String.format("<%s> - <%s>.mp3", ((SongHeaderMessage) header).getArtistName(),
+                                    ((SongHeaderMessage) header).getSongName());
 
-                        this.writeByteArrayToFile(songBytes, filename);
+                            byte[] songBytes = ois.readAllBytes();
 
+                            this.writeByteArrayToFile(songBytes, filename);
+                        } // else there are NO bytes to be written
+                          // TODO: do I need to wait until there are bytes to be written? or continue with reading?
 
+                    } else { // the user wants to see the list
+
+                        // print all the strings you are receiving
+                        // (Since you will just be receiving a list of stuff in the record).
+                        // SongDataMessages, takes the byte data from those data messages and writes it into a
+                        // properly named file.
+
+                        // TODO: how to make sure that ALL the strings are printed
+                        System.out.println(ois.read());
                     }
                     break;
 
                 } else {
                     //TODO: this is not a songHeaderObject
-                    // print all the strings you are receiving
-                    // (Since you will just be receiving a list of stuff in the record).
 
-                    System.out.println(ois.read());
 
                     break;
                 }
-
 
             } while (true);
         } catch (Exception a) {
@@ -235,35 +246,37 @@ final class ResponseListener implements Runnable {
      * @param fileName  the name of the file to which the bytes will be written
      */
     private void writeByteArrayToFile(byte[] songBytes, String fileName) {
+        FileOutputStream fos = null;
 
-        BufferedWriter bw = null;
         try {
 
-            File file = new File(fileName);
+            //File file = new File(fileName);
+            fos = new FileOutputStream(fileName, true);
 
-            FileWriter fw = new FileWriter(file);
-            bw = new BufferedWriter(fw);
+            //FileWriter fw = new FileWriter(file);
+            //bw = new BufferedWriter(fw);
 
             //TODO: not sure if this is right
             //create loop to write song bytes
             if (songBytes.length > 0) {
-                for (int i = 0; i < file.length(); i++) {
-                    bw.write(songBytes[i]);
+                for (int i = 0; i < fileName.length(); i++) {
+                    fos.write(songBytes[i]);
+                    fos.flush();
                 }
                 System.out.println("File written Successfully");
             }
-
         }
         catch (IOException e) {
             e.printStackTrace();
         }
-        finally
-        {
-            try{
-                if(bw!=null)
-                    bw.close();
-            }catch(Exception a){
-                System.out.println("Error in closing the BufferedWriter"+a);
-            }        }
+        finally {
+            try {
+                if (fos != null) {
+                    fos.close();
+                }
+            } catch(Exception a) {
+                System.out.println("Error in closing fos" + a);
+            }
+        } // end finally
     }
 }
