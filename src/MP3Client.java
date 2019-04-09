@@ -71,7 +71,8 @@ public class MP3Client {
                     // the socket and continue with the client.
 
                     outServer.println(showList);
-                    Thread listThread = new ResponseListener;
+                    ResponseListener listThread = new ResponseListener(serverConnection);
+                    new Thread (listThread).start();
 
                     if (!listThread.isAlive()) { //the thread has finished
                         //TODO: close the socket
@@ -96,7 +97,12 @@ public class MP3Client {
                     // the socket and continue with the client.
 
                     outServer.println(songRequest);
-                    Thread downloadThread = new ResponseListener;
+
+                    //ClientHandler clientHandler = new ClientHandler(clientSocket);
+                    //new Thread(clientHandler).start();
+
+                    ResponseListener downloadThread = new ResponseListener(serverConnection);
+                    new Thread (downloadThread).start();
 
                     if (!downloadThread.isAlive()) { //the thread has finished
                         //close the socket
@@ -135,6 +141,8 @@ public class MP3Client {
                 i.printStackTrace();
             } //end try catch
         } //end if
+
+        return;
     } //end try catch
 }
 
@@ -146,17 +154,16 @@ public class MP3Client {
  */
 final class ResponseListener implements Runnable {
 
+
     private ObjectInputStream ois;
-    private Socket socket;
 
     public ResponseListener(Socket clientSocket) throws IOException {
+        //This constructor takes in a socket and builds the ObjectInputStream with it.
 
         if (clientSocket == null) {
             throw new IllegalArgumentException("clientSocket argument is null");
         } else {
-            this.socket = clientSocket;
             this.ois = new ObjectInputStream(clientSocket.getInputStream());
-
         }
     }
 
@@ -223,14 +230,13 @@ final class ResponseListener implements Runnable {
 
                 } else {
                     //TODO: this is not a songHeaderObject
-
-
                     break;
                 }
 
             } while (true);
         } catch (Exception a) {
-
+            //either the class is not found or I/O exception
+            a.printStackTrace();
         }
     }
 
@@ -274,4 +280,5 @@ final class ResponseListener implements Runnable {
             }
         } // end finally
     }
+}
 }
