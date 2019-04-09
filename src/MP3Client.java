@@ -87,7 +87,6 @@ public class MP3Client {
             } else if (response.equals("1")) {
 
                 //they want to see the songs
-
                 SongRequest showList = new SongRequest(false);
 
                 //TODO:
@@ -123,7 +122,7 @@ public class MP3Client {
 
         } //end while
 
-         scan.close();
+        scan.close();
 
         inServer.close();
 
@@ -158,10 +157,14 @@ final class ResponseListener implements Runnable {
     public ResponseListener(Socket clientSocket) throws IOException {
         //TODO: Implement constructor
 
+
         if (clientSocket == null) {
             throw new IllegalArgumentException("clientSocket argument is null");
         } else {
-            clientSocket = // need to assign client socket to something
+            clientSocket = // need to assign client socket to something?
+
+            ObjectInputStream ois = new ObjectInputStream();
+
         }
     }
 
@@ -175,6 +178,7 @@ final class ResponseListener implements Runnable {
      */
     public void run() {
         //TODO: Implement run
+        //
 
     }
 
