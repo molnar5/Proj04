@@ -21,126 +21,121 @@ public class MP3Client {
         String response;
 
         try {
-            serverConnection = new Socket("localhost", 9478);
+            do {
+                serverConnection = new Socket("localhost", 9478);
 
-            inServer = new Scanner(serverConnection.getInputStream());
+                inServer = new Scanner(serverConnection.getInputStream());
 
-            outServer = new PrintWriter(serverConnection.getOutputStream(), true);
-        } catch (IOException e) {
-            System.out.println("A file input/output exception occurred");
+                outServer = new PrintWriter(serverConnection.getOutputStream(), true);
 
-            System.out.printf("Exception message: %s\n", e.getMessage());
+                System.out.println("<Connected to the server>");
 
-            if (inServer != null) {
-                inServer.close();
-            } //end if
+                System.out.println("============ Options ============");
+                System.out.println("(1) See list of available songs");
+                System.out.println("(2) Request song download");
+                System.out.println(" *  Exit");
+                System.out.println("=================================");
 
-            if (serverConnection != null) {
-                try {
-                    serverConnection.close();
-                } catch (IOException i) {
-                    i.printStackTrace();
-                } //end try catch
-            } //end if
-
-            return;
-        } //end try catch
-
-        System.out.println("<Connected to the server>");
-
-        System.out.println("============ Options ============");
-        System.out.println("(1) See list of available songs");
-        System.out.println("(2) Request song download");
-        System.out.println(" *  Exit");
-        System.out.println("=================================");
-
-        System.out.println("Please enter an option number or 'exit' to leave." );
-
-        while (scan.hasNextLine()) { // while the user continues to enter requests to the server
-            outServer.println(scan.nextLine());
-
-            if (inServer.hasNextLine()) {
-                response = inServer.nextLine();
-            } else {
-                System.out.println("<Lost the connection with the server>");
-
-                return;
-            } //end if
-
-            System.out.printf("Response from the server: %s\n", response);
-
-            if (response == null) {
-                //response invalid
-                System.out.println("Response invalid.");
                 System.out.println("Please enter an option number or 'exit' to leave." );
 
-            } else if (response.length() == 0 ) {
-                //response invalid
-                System.out.println("Response invalid.");
-                System.out.println("Please enter an option number or 'exit' to leave." );
+                outServer.println(scan.nextLine());
 
-            } else if (response.equals("1")) {
-                //they want to see the songs
-                SongRequest showList = new SongRequest(false);
+                if (inServer.hasNextLine()) {
+                    response = inServer.nextLine();
+                } else {
+                    System.out.println("<Lost the connection with the server>");
 
-                //TODO:
-                // send the server the song request
-                // After sending a request to the server, create a Thread with a ResponseListener
-                // to listen for the server's response. Wait for this thread to finish, then close
-                // the socket and continue with the client.
+                    return;
+                } //end if
 
-                outServer.println(showList);
+                System.out.printf("Response from the server: %s\n", response);
 
+                if (response == null) {
+                    //response invalid
+                    System.out.println("Response invalid.");
+                    System.out.println("Please enter an option number or 'exit' to leave." );
 
-            } else if (response.equals("2")) {
+                } else if (response.length() == 0 ) {
+                    //response invalid
+                    System.out.println("Response invalid.");
+                    System.out.println("Please enter an option number or 'exit' to leave." );
 
-                //they want to download the song
+                } else if (response.equals("1")) {
+                    //they want to see the songs
+                    SongRequest showList = new SongRequest(false);
 
-                System.out.println("Please enter the song title");
-                String songName = inServer.nextLine();
-                System.out.println("Please enter the artist name");
-                String artist = inServer.nextLine();
-                SongRequest songRequest = new SongRequest(true, songName, artist);
+                    //TODO:
+                    // send the server the song request
+                    // After sending a request to the server, create a Thread with a ResponseListener
+                    // to listen for the server's response. Wait for this thread to finish, then close
+                    // the socket and continue with the client.
 
-                //TODO:
-                // send the sever the song request
-                // After sending a request to the server, create a Thread with a ResponseListener
-                // to listen for the server's response. Wait for this thread to finish, then close
-                // the socket and continue with the client.
+                    outServer.println(showList);
+                    Thread listThread = new ResponseListener;
 
-                outServer.println(songRequest);
+                    if (!listThread.isAlive()) { //the thread has finished
+                        //TODO: close the socket
+                        serverConnection.close();
 
-            } else if (response.equalsIgnoreCase("exit")) {
-                // stop the program
-                break;
-            } else {
-                //input must be invalid
-                System.out.println("Response invalid.");
-                System.out.println("Please enter an option number or 'exit' to leave." );
-            }
+                    }
 
-        } //end while
+                } else if (response.equals("2")) {
 
-        scan.close();
+                    //they want to download the song
 
-        inServer.close();
+                    System.out.println("Please enter the song title");
+                    String songName = inServer.nextLine();
+                    System.out.println("Please enter the artist name");
+                    String artist = inServer.nextLine();
+                    SongRequest songRequest = new SongRequest(true, songName, artist);
 
-        outServer.close();
+                    //TODO:
+                    // send the sever the song request
+                    // After sending a request to the server, create a Thread with a ResponseListener
+                    // to listen for the server's response. Wait for this thread to finish, then close
+                    // the socket and continue with the client.
 
-        try {
-            serverConnection.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } //end try catch
+                    outServer.println(songRequest);
+                    Thread downloadThread = new ResponseListener;
 
-        // The main method for this class should create a socket to
-        // connect to the server and get a reference to the socket's
-        // output stream as a ObjectOutputStream. Then, ask the user
-        // if they want to see the list of available songs or just
-        // request to download a song. If the user enters the word
-        // “exit”, you should stop asking for their input. Also, if
-        // the user enters an invalid choice, prompt them again.
-    }
+                    if (!downloadThread.isAlive()) { //the thread has finished
+                        //close the socket
+                        serverConnection.close();
+                    }
+
+                } else if (response.equalsIgnoreCase("exit")) {
+                    // stop the program
+                    break;
+                } else {
+                    //input must be invalid
+                    System.out.println("Response invalid.");
+                    System.out.println("Please enter an option number or 'exit' to leave." );
+                }
+            } while (scan.hasNextLine());
+
+            scan.close();
+
+            inServer.close();
+
+            outServer.close();
+
+    } catch (IOException e) {
+        System.out.println("A file input/output exception occurred");
+
+        System.out.printf("Exception message: %s\n", e.getMessage());
+
+        if (inServer != null) {
+            inServer.close();
+        } //end if
+
+        if (serverConnection != null) {
+            try {
+                serverConnection.close();
+            } catch (IOException i) {
+                i.printStackTrace();
+            } //end try catch
+        } //end if
+    } //end try catch
 }
 
 
