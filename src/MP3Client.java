@@ -76,8 +76,8 @@ public class MP3Client {
                     ResponseListener listThread = new ResponseListener(serverConnection);
                     new Thread (listThread).start();
 
-                    if (!listThread.isAlive()) { //the thread has finished
-                        //TODO: close the socket
+                    if (!(listThread.isAlive())) { //the thread has finished
+                        //close the socket
                         serverConnection.close();
 
                     }
@@ -100,6 +100,7 @@ public class MP3Client {
 
                     outServer.println(songRequest);
 
+                    ///////////format in Server class to create thread//////////////
                     //ClientHandler clientHandler = new ClientHandler(clientSocket);
                     //new Thread(clientHandler).start();
 
@@ -159,10 +160,17 @@ final class ResponseListener implements Runnable {
     public ResponseListener(Socket clientSocket) throws IOException {
         //This constructor takes in a socket and builds the ObjectInputStream with it.
 
+        /*
         if (clientSocket == null) {
             throw new IllegalArgumentException("clientSocket argument is null");
         } else {
-            this.ois = new ObjectInputStream(clientSocket.getInputStream());
+            ois = new ObjectInputStream(clientSocket.getInputStream());
+        }
+        */
+        try {
+            ois = new ObjectInputStream(clientSocket.getInputStream());
+        } catch (IOException f) {
+            f.printStackTrace();
         }
     }
 
@@ -228,7 +236,7 @@ final class ResponseListener implements Runnable {
                     break;
 
                 } else {
-                    //TODO: this is not a songHeaderObject what to do now
+                    //TODO: this is not a songHeaderObject... what to do now?
                     break;
                 }
 
