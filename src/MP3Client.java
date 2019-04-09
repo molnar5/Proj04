@@ -6,13 +6,6 @@ import java.io.PrintWriter;
 import java.io.BufferedWriter;
 import java.io.File;
 
-
-
-//hello this is a test message!!
-//hello!
-
-//Annah Aunger
-
 /**
  * An MP3 Client to request .mp3 files from a server and receive them over the socket connection.
  */
@@ -76,14 +69,16 @@ public class MP3Client {
 
             System.out.printf("Response from the server: %s\n", response);
 
-            //System.out.println("Please enter an option number or 'exit' to leave." );
-
             if (response == null) {
+                //response invalid
+                System.out.println("Response invalid.");
+                System.out.println("Please enter an option number or 'exit' to leave." );
 
             } else if (response.length() == 0 ) {
                 //response invalid
                 System.out.println("Response invalid.");
                 System.out.println("Please enter an option number or 'exit' to leave." );
+
             } else if (response.equals("1")) {
 
                 //they want to see the songs
@@ -153,17 +148,15 @@ public class MP3Client {
 final class ResponseListener implements Runnable {
 
     private ObjectInputStream ois;
+    private Socket socket;
 
     public ResponseListener(Socket clientSocket) throws IOException {
-        //TODO: Implement constructor
-
 
         if (clientSocket == null) {
             throw new IllegalArgumentException("clientSocket argument is null");
         } else {
-            clientSocket = // need to assign client socket to something?
-
-            ObjectInputStream ois = new ObjectInputStream();
+            this.socket = clientSocket;
+            this.ois = new ObjectInputStream(clientSocket.getInputStream());
 
         }
     }
@@ -178,8 +171,61 @@ final class ResponseListener implements Runnable {
      */
     public void run() {
         //TODO: Implement run
-        //
 
+        //This is the only method, you will need to implement in this class.
+        // Simply put, you will need to read in the first object you get as a
+        // SongHeader message (after checking that it isn't null and a different object).
+        // Once you do, you determine what type of message it is. If it is a download message
+        // you will need to receive all of the bytes from the output stream and write it to a
+        // file in the savedSongs directory with the name
+
+
+        try {
+            //Scanner scan = new Scanner(ois);
+
+            Object header = ois.readObject();
+
+            do {
+
+                if (header == null) {
+
+                    header = ois.readObject();
+
+                } else if (header instanceof SongHeaderMessage){
+                    if (((SongHeaderMessage) header).getFileSize() != -1) { //there are bytes to be written
+
+                        //format: SongHeaderMessage(true, songName, artistName, byteArray.length);
+
+                        // you will need to receive all of the bytes from the output stream and write it to a
+                        // file in the savedSongs directory with the name
+                        //“<Artist> - <Song name>.mp3”
+
+                        String filename = String.format("<%s> - <%s>.mp3",((SongHeaderMessage) header).getArtistName(),
+                                ((SongHeaderMessage) header).getSongName());
+
+                        byte[] songBytes = ois.readAllBytes();
+
+                        this.writeByteArrayToFile(songBytes, filename);
+
+
+                    }
+                    break;
+
+                } else {
+                    //TODO: this is not a songHeaderObject
+                    // print all the strings you are receiving
+                    // (Since you will just be receiving a list of stuff in the record).
+
+                    System.out.println(ois.read());
+
+                    break;
+                }
+
+
+            } while (true);
+        } catch (Exception a) {
+
+        }
     }
 
     /**
@@ -189,7 +235,7 @@ final class ResponseListener implements Runnable {
      * @param fileName  the name of the file to which the bytes will be written
      */
     private void writeByteArrayToFile(byte[] songBytes, String fileName) {
-        //TODO: Implement writeByteArrayToFile
+
         BufferedWriter bw = null;
         try {
 
@@ -197,10 +243,16 @@ final class ResponseListener implements Runnable {
 
             FileWriter fw = new FileWriter(file);
             bw = new BufferedWriter(fw);
-            //TODO: create loop to write song bytes
-            bw.write(songBytes);
 
-            System.out.println("File written Successfully");
+            //TODO: not sure if this is right
+            //create loop to write song bytes
+            if (songBytes.length > 0) {
+                for (int i = 0; i < file.length(); i++) {
+                    bw.write(songBytes[i]);
+                }
+                System.out.println("File written Successfully");
+            }
+
         }
         catch (IOException e) {
             e.printStackTrace();
