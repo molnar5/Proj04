@@ -146,13 +146,6 @@ final class ResponseListener implements Runnable {
     public ResponseListener(Socket clientSocket) throws IOException {
         //This constructor takes in a socket and builds the ObjectInputStream with it.
 
-        /*
-        if (clientSocket == null) {
-            throw new IllegalArgumentException("clientSocket argument is null");
-        } else {
-            ois = new ObjectInputStream(clientSocket.getInputStream());
-        }
-        */
         try {
             ois = new ObjectInputStream(clientSocket.getInputStream());
         } catch (IOException f) {
@@ -169,7 +162,6 @@ final class ResponseListener implements Runnable {
      * properly named file.
      */
     public void run() {
-        //TODO: Implement run
 
         //This is the only method, you will need to implement in this class.
         // Simply put, you will need to read in the first object you get as a
@@ -233,7 +225,7 @@ final class ResponseListener implements Runnable {
                         // properly named file.
                         Object fromServer;
 
-                        do {
+                        do { // make sure that ALL the strings are printed
 
                             fromServer = ois.readObject();
 
@@ -242,14 +234,12 @@ final class ResponseListener implements Runnable {
                             }
                         } while (fromServer != null);
 
-                        // TODO: how to make sure that ALL the strings are printed
                     }
                     break;
 
                 } else {
-                    //TODO: this is not a songHeaderObject... what to do now?
+                    // this is not a songHeaderObject
 
-                    // I dunno
                     System.out.println("Server did not send a header...");
                     break;
                 }
@@ -272,24 +262,10 @@ final class ResponseListener implements Runnable {
 
         try {
 
-            //File file = new File(fileName);
             fos = new FileOutputStream(fileName, true);
 
-            //FileWriter fw = new FileWriter(file);
-            //bw = new BufferedWriter(fw);
-
-            //TODO: not sure if this is right
-            //create loop to write song bytes
-            /*
-            if (songBytes.length > 0) {
-                for (int i = 0; i < fileName.length(); i++) {
-                    fos.write(songBytes[i]);
-                    fos.flush();
-                }
-
-            }
-            */
             fos.write(songBytes);
+            fos.flush();
             fos.close();
 
         }
