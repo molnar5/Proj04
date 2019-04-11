@@ -18,17 +18,16 @@ public class MP3Client {
 
         Socket serverConnection = null;
         Scanner scan = new Scanner(System.in);
-        Scanner inServer = null;
-        PrintWriter outServer;
+        ObjectOutputStream outServer;
         String response;
 
         try {
-            do {
+            while (true) {
                 serverConnection = new Socket("localhost", 9478);
+                //serverConnection = new Socket("66.70.189.118", 9478);
 
-                inServer = new Scanner(serverConnection.getInputStream());
-
-                outServer = new PrintWriter(serverConnection.getOutputStream(), true);
+                outServer = new ObjectOutputStream(serverConnection.getOutputStream());
+                outServer.flush();
 
                 System.out.println("<Connected to the server>");
 
@@ -40,17 +39,17 @@ public class MP3Client {
 
                 System.out.println("Please enter an option number or 'exit' to leave.");
 
-                outServer.println(scan.nextLine());
+                //outServer.writeObject(scan.nextLine());
 
-                if (inServer.hasNextLine()) {
-                    response = inServer.nextLine();
+                if (scan.hasNextLine()) {
+                    response = scan.nextLine();
                 } else {
                     System.out.println("<Lost the connection with the server>");
 
                     return;
                 } //end if
 
-                System.out.printf("Response from the server: %s\n", response);
+                //System.out.printf("Response from the server: %s\n", response);
 
                 if (response == null) {
                     //response invalid
@@ -66,79 +65,40 @@ public class MP3Client {
                     //they want to see the songs
                     SongRequest showList = new SongRequest(false);
 
-                    //TODO:
-                    // send the server the song request
-                    // After sending a request to the server, create a Thread with a ResponseListener
-                    // to listen for the server's response. Wait for this thread to finish, then close
-                    // the socket and continue with the client.
-
-
-                    outServer.println(showList);
+                    outServer.writeObject(showList);
+                    outServer.flush();
 
                     ResponseListener listThread = new ResponseListener(serverConnection);
-                    new Thread(listThread).start();
-                    //TODO: figure out how to find out if the thread is still running not sure if below is applicable
-                    // it may need to go in some sort of loop where it waits a certain amount of time then checks again
-                    // or a while loop?
+                    Thread t = new Thread(listThread);
+                    t.start();
 
-                    Thread t = Thread.currentThread();
-
-                    while(t.isAlive()) {
-                        try {
-                            //Thread.sleep(100);
-                            TimeUnit.SECONDS.sleep(1); // not sure if this is the best option... I have something different written in the next block
-                            if (!t.isAlive()) {
-                                serverConnection.close();
-                            }
-                        } catch (InterruptedException g) {
-                            g.printStackTrace();
-                        }
+                    try {
+                        t.join();
+                    } catch (InterruptedException e) {
+                        System.out.println("Thread Join Interrupted");
                     }
 
-                    /*while (!t.isAlive()) {
-                        serverConnection.close();
-                        break;
-                    }*/
-
                 } else if (response.equals("2")) {
-
                     //they want to download the song
 
                     System.out.println("Please enter the song title");
-                    String songName = inServer.nextLine();
+                    String songName = scan.nextLine();
                     System.out.println("Please enter the artist name");
-                    String artist = inServer.nextLine();
+                    String artist = scan.nextLine();
                     SongRequest songRequest = new SongRequest(true, songName, artist);
 
-                    //TODO:
-                    // send the sever the song request
-                    // After sending a request to the server, create a Thread with a ResponseListener
-                    // to listen for the server's response. Wait for this thread to finish, then close
-                    // the socket and continue with the client.
-
-                    outServer.println(songRequest);
-
-                    ///////////format in Server class to create thread//////////////
-                    //ClientHandler clientHandler = new ClientHandler(clientSocket);
-                    //new Thread(clientHandler).start();
+                    outServer.writeObject(songRequest);
+                    outServer.flush();
 
                     ResponseListener downloadThread = new ResponseListener(serverConnection);
 
-                    new Thread(downloadThread).start();
-
-
-                    //TODO: figure out how to find out if the thread is still running not sure if below is applicable
-
-                    Thread t = Thread.currentThread();
+                    Thread t = new Thread(downloadThread);
+                    t.start();
 
                     try {
-                        while (t.isAlive()) {
-                            //do nothing. let it run until it is done
-                        }
-                    } finally {
-                        if (!(t.isAlive())) {
-                            serverConnection.close();
-                        }
+                        t.join();
+                    } catch (InterruptedException e) {
+                        System.out.println("Thread Join Interrupted");
                     }
 
                 } else if (response.equalsIgnoreCase("exit")) {
@@ -149,22 +109,18 @@ public class MP3Client {
                     System.out.println("Response invalid.");
                     System.out.println("Please enter an option number or 'exit' to leave.");
                 }
-            } while (scan.hasNextLine());
+
+                outServer.close();
+                serverConnection.close();
+            }
 
             scan.close();
 
-            inServer.close();
-
-            outServer.close();
 
         } catch (IOException e) {
             System.out.println("A file input/output exception occurred");
 
             System.out.printf("Exception message: %s\n", e.getMessage());
-
-            if (inServer != null) {
-                inServer.close();
-            } //end if
 
             if (serverConnection != null) {
                 try {
@@ -223,20 +179,17 @@ final class ResponseListener implements Runnable {
         // file in the savedSongs directory with the name
 
         try {
-            //Scanner scan = new Scanner(ois);
-
-            Object header = ois.readObject();
 
             do {
 
+                SongHeaderMessage header = (SongHeaderMessage) ois.readObject();
+
                 if (header == null) {
 
-                    header = ois.readObject();
-
                 } else if (header instanceof SongHeaderMessage){
-                    if (((SongHeaderMessage) header).isSongHeader()) { // is is a download request
+                    if ((header).isSongHeader()) { // is is a download request
 
-                        if (((SongHeaderMessage) header).getFileSize() != -1) { //there are bytes to be written
+                        if ((header).getFileSize() != -1) { //there are bytes to be written
 
                             //format: SongHeaderMessage(true, songName, artistName, byteArray.length);
 
@@ -244,14 +197,33 @@ final class ResponseListener implements Runnable {
                             // file in the savedSongs directory with the name
                             //“<Artist> - <Song name>.mp3”
 
-                            String filename = String.format("<%s> - <%s>.mp3", ((SongHeaderMessage) header).getArtistName(),
-                                    ((SongHeaderMessage) header).getSongName());
+                            String filename = String.format("savedSongs/%s - %s.mp3", header.getArtistName(),
+                                    header.getSongName());
 
-                            byte[] songBytes = ois.readAllBytes();
+                            Object fromServer;
+
+                            byte[] songBytes = new byte [header.getFileSize()];
+                            int offset = 0;
+
+                            do {
+
+                                fromServer = ois.readObject();
+
+                                if (fromServer != null) {
+                                    //System.out.println(offset);
+                                    SongDataMessage dataMessage = (SongDataMessage) fromServer;
+                                    System.arraycopy(dataMessage.getData(), 0, songBytes , offset,
+                                            Math.min(1000, songBytes.length - offset));
+                                    offset += 1000;
+                                }
+
+                            } while (fromServer != null);
 
                             this.writeByteArrayToFile(songBytes, filename);
-                        } // else there are NO bytes to be written
-                          // TODO: do I need to wait until there are bytes to be written? or continue with reading?
+                        } else {
+                            // else there are NO bytes to be written
+                            System.out.println("Song not available!");
+                        }
 
                     } else { // the user wants to see the list
 
@@ -259,14 +231,26 @@ final class ResponseListener implements Runnable {
                         // (Since you will just be receiving a list of stuff in the record).
                         // SongDataMessages, takes the byte data from those data messages and writes it into a
                         // properly named file.
+                        Object fromServer;
+
+                        do {
+
+                            fromServer = ois.readObject();
+
+                            if (fromServer != null) {
+                                System.out.println((String) fromServer);
+                            }
+                        } while (fromServer != null);
 
                         // TODO: how to make sure that ALL the strings are printed
-                        System.out.println(ois.read());
                     }
                     break;
 
                 } else {
                     //TODO: this is not a songHeaderObject... what to do now?
+
+                    // I dunno
+                    System.out.println("Server did not send a header...");
                     break;
                 }
 
@@ -296,13 +280,18 @@ final class ResponseListener implements Runnable {
 
             //TODO: not sure if this is right
             //create loop to write song bytes
+            /*
             if (songBytes.length > 0) {
                 for (int i = 0; i < fileName.length(); i++) {
                     fos.write(songBytes[i]);
                     fos.flush();
                 }
-                System.out.println("File written Successfully");
+
             }
+            */
+            fos.write(songBytes);
+            fos.close();
+
         }
         catch (IOException e) {
             e.printStackTrace();

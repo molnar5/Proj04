@@ -45,6 +45,9 @@ public class MP3Server {
             System.out.println("Spawning Client Handler");
 
             ClientHandler clientHandler = new ClientHandler(clientSocket);
+
+            System.out.println("    Starting Client Handler");
+
             new Thread(clientHandler).start();
 
         }
@@ -70,10 +73,16 @@ final class ClientHandler implements Runnable {
 
     public ClientHandler(Socket clientSocket) {
         try {
-            inputStream = new ObjectInputStream(clientSocket.getInputStream());
+
+            System.out.println("    Creating output stream");
             outputStream = new ObjectOutputStream(clientSocket.getOutputStream());
+            outputStream.flush();
+
+            System.out.println("    Creating input stream");
+            inputStream = new ObjectInputStream(clientSocket.getInputStream());
+
         } catch (IOException e) {
-            System.out.print("IO Exception:");
+            System.out.println("IO Exception");
         }
     }
 
@@ -87,17 +96,24 @@ final class ClientHandler implements Runnable {
 
         // Catches IO and Class Not Found Exceptions
         try {
+            System.out.println("    Waiting for client Request");
             // Waits for request from client
             clientRequest = (SongRequest) inputStream.readObject();
+            System.out.println("Received Client Request");
 
             if (clientRequest.isDownloadRequest()) {
+                System.out.println("Download Request");
 
                 String songName = clientRequest.getSongName();
                 String artistName = clientRequest.getArtistName();
 
                 String fileName = artistName + " - " + songName + ".mp3";  // Formats song data into file name
 
+                System.out.println("    Client Requested: <" + fileName +">");
+
                 if (fileInRecord(fileName)) {
+                    System.out.println("    File in Record!");
+
                     // Sends header with song information
                     byte [] byteArray = readSongData(fileName);
                     header = new SongHeaderMessage(true, songName, artistName, byteArray.length);
@@ -107,6 +123,8 @@ final class ClientHandler implements Runnable {
                     sendByteArray(byteArray);
 
                 } else {
+                    System.out.println("    File not in Record :(");
+
                     // Sends back header with file size of -1 if not available
                     header = new SongHeaderMessage(true, songName, artistName, -1);
                     outputStream.writeObject(header);
@@ -114,10 +132,13 @@ final class ClientHandler implements Runnable {
                 }
 
             } else {
+                System.out.println("List Request");
                 // If not a download request sends header with false and record data
                 header = new SongHeaderMessage(false);
                 outputStream.writeObject(header);
                 outputStream.flush();
+
+                System.out.println("    Sent Header");
 
                 sendRecordData();
             }
@@ -143,8 +164,10 @@ final class ClientHandler implements Runnable {
         Scanner s;                 // Scanner for reading records.txt
         ArrayList<String> lines;   // The lines of records.txt
 
+        System.out.println("Checking Database");
+
         try {
-            s = new Scanner(new File("records.txt"));
+            s = new Scanner(new File("record.txt"));
         } catch (IOException e) {
             return false;
         }
@@ -153,7 +176,8 @@ final class ClientHandler implements Runnable {
 
         // Adds each line to the lines array list
         while (s.hasNextLine()) {
-            lines.add(s.nextLine());
+            String nextLine = s.nextLine();
+            lines.add(nextLine);
         }
 
         s.close();
@@ -173,8 +197,16 @@ final class ClientHandler implements Runnable {
         byte [] byteArray;     // Stores mp3 data
 
         try {
-            is = new FileInputStream(new File(fileName));
+            is = new FileInputStream(new File("songDatabase/" + fileName));
             dis = new DataInputStream(is);
+
+            /*
+            File file = new File("myFile");
+            byte[] fileData = new byte[(int) file.length()];
+            DataInputStream dis = new DataInputStream(new FileInputStream(file));
+            dis.readFully(fileData);
+            dis.close();
+            */
 
             // Reads the mp3 to a byte array
             byteArray = dis.readAllBytes();
@@ -182,8 +214,13 @@ final class ClientHandler implements Runnable {
             is.close();
             dis.close();
 
+            if (byteArray == null) {
+                System.out.println("    No Data for song found");
+            }
+
             return byteArray;
         } catch (IOException e) {
+            System.out.println("IO Exception reading song");
             return null;
         }
     }
@@ -229,18 +266,27 @@ final class ClientHandler implements Runnable {
         String [] lineParts;  // Array that stores 2 strings: one from before " - " and one from after " - "
         String message;       // Reformatted line sent to the client
 
+        System.out.println("Sending record data");
+
         try {
-            s = new Scanner(new File("records.txt"));
+            s = new Scanner(new File("record.txt"));
 
             while (s.hasNextLine()) {
                 lineParts = s.nextLine().split(" - ");
-                message = "\"" + lineParts[1].replace(".mp3","") + "\" By:" + lineParts[0];
+                message = "\"" + lineParts[1].replace(".mp3","") + "\" By: " + lineParts[0];
+                System.out.println("Sending " + message);
                 outputStream.writeObject(message);
                 outputStream.flush();
             }
 
             s.close();
+
+            outputStream.writeObject(null);
+            outputStream.flush();
+
         } catch (IOException e) {
+            System.out.println("IO Exception when sending record data");
+            e.printStackTrace();
             return;
         }
     }
