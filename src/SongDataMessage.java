@@ -8,7 +8,7 @@ import java.io.Serializable;
  * @author Aidan Molnar, lab 17
  * @author Annah Aunger, lab 17
  *
- * @version March 20, 2019
+ * @version April 11, 2019
  *
  */
 public class SongDataMessage implements Serializable {
