@@ -14,7 +14,6 @@ import java.util.concurrent.TimeUnit;
 public class MP3Client {
 
     public static void main(String[] args) {
-        //TODO: Implement main
 
         Socket serverConnection = null;
         Scanner scan = new Scanner(System.in);
@@ -35,7 +34,7 @@ public class MP3Client {
                 outServer = new ObjectOutputStream(serverConnection.getOutputStream());
                 outServer.flush();
 
-                System.out.println("<Connected to the server>");
+                System.out.printf("<Connected to the server>\n\n");
 
                 System.out.println("============ Options ============");
                 System.out.println("(1) See list of available songs");
@@ -45,8 +44,6 @@ public class MP3Client {
 
                 System.out.println("Please enter an option number or 'exit' to leave.");
 
-                //outServer.writeObject(scan.nextLine());
-
                 if (scan.hasNextLine()) {
                     response = scan.nextLine();
                 } else {
@@ -54,8 +51,6 @@ public class MP3Client {
 
                     return;
                 } //end if
-
-                //System.out.printf("Response from the server: %s\n", response);
 
                 if (response == null) {
                     //response invalid
@@ -108,7 +103,6 @@ public class MP3Client {
                         System.out.println("Thread Join Interrupted");
                     }
 
-
                 } else if (response.equalsIgnoreCase("exit")) {
                     // stop the program
                     break;
@@ -123,7 +117,6 @@ public class MP3Client {
             }
 
             scan.close();
-
 
         } catch (IOException e) {
             System.out.println("A file input/output exception occurred");
@@ -140,7 +133,6 @@ public class MP3Client {
         } //end try catch
     }
 }
-
 
 /**
  * This class implements Runnable, and will contain the logic for listening for
@@ -177,7 +169,6 @@ final class ResponseListener implements Runnable {
      * properly named file.
      */
     public void run() {
-        //TODO: Implement run
 
         //This is the only method, you will need to implement in this class.
         // Simply put, you will need to read in the first object you get as a
@@ -248,14 +239,12 @@ final class ResponseListener implements Runnable {
                             }
                         } while (fromServer != null);
 
-                        // TODO: how to make sure that ALL the strings are printed
                     }
                     break;
 
                 } else {
-                    //TODO: this is not a songHeaderObject... what to do now?
+                    //this is not a songHeaderObject
 
-                    // I dunno
                     System.out.println("Server did not send a header...");
                     break;
                 }
