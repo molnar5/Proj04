@@ -1,7 +1,15 @@
 import java.io.Serializable;
 
 /**
+ * Proj 4 -- MP3 Server
+ *
  * A message that encapsulates a song request to the server.
+ *
+ * @author Aidan Molnar, lab 17
+ * @author Annah Aunger, lab 17
+ *
+ * @version March 20, 2019
+ *
  */
 public class SongRequest implements Serializable {
     private boolean downloadRequest; // true only if the request is to download a song

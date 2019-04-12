@@ -6,7 +6,15 @@ import java.util.Scanner;
 import java.util.ArrayList;
 
 /**
- * A MP3 Server for sending mp3 files over a socket connection.
+ * Proj 4 -- MP3 Server
+ *
+ * A class that creates a server for mp3 files.
+ *
+ * @author Aidan Molnar, lab 17
+ * @author Annah Aunger, lab 17
+ *
+ * @version April 11, 2019
+ *
  */
 public class MP3Server {
 
@@ -54,11 +62,15 @@ public class MP3Server {
 }
 
 /**
- * Class - ClientHandler
+ * Proj 4 -- MP3 Server
  *
- * This class implements Runnable, and will contain the logic for handling responses and requests to
- * and from a given client. The threads you create in MP3Server will be constructed using instances
- * of this class.
+ * A task that handles client requests for the mp3 server.
+ *
+ * @author Aidan Molnar, lab 17
+ * @author Annah Aunger, lab 17
+ *
+ * @version April 11, 2019
+ *
  */
 final class ClientHandler implements Runnable {
 
