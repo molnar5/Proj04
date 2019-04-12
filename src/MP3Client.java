@@ -216,7 +216,6 @@ final class ResponseListener implements Runnable {
 
                                 if (fromServer != null) {
                                     //System.out.println(offset);
-                                    System.out.println("Received Message: " + offset / 1000);
                                     SongDataMessage dataMessage = (SongDataMessage) fromServer;
                                     System.arraycopy(dataMessage.getData(), 0, songBytes , offset,
                                             Math.min(1000, songBytes.length - offset));
