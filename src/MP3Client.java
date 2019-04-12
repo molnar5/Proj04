@@ -292,7 +292,7 @@ final class ResponseListener implements Runnable {
                 if (fos != null) {
                     fos.close();
                 }
-            } catch(Exception a) {
+            } catch (Exception a) {
                 System.out.println("Error in closing fos" + a);
             }
         } // end finally
