@@ -183,8 +183,6 @@ final class ResponseListener implements Runnable {
 
                         if ((header).getFileSize() != -1) { //there are bytes to be written
 
-                            //format: SongHeaderMessage(true, songName, artistName, byteArray.length);
-
                             // you will need to receive all of the bytes from the output stream and write it to a
                             // file in the savedSongs directory with the name
                             //“<Artist> - <Song name>.mp3”
