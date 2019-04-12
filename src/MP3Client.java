@@ -34,13 +34,13 @@ public class MP3Client {
                 outServer = new ObjectOutputStream(serverConnection.getOutputStream());
                 outServer.flush();
 
-                System.out.printf("<Connected to the server>\n\n");
+                System.out.println("<Connected to the server>\n\n");
 
                 System.out.println("============ Options ============");
                 System.out.println("(1) See list of available songs");
                 System.out.println("(2) Request song download");
                 System.out.println(" *  Exit");
-                System.out.printf("=================================\n\n");
+                System.out.println("=================================\n\n");
 
                 System.out.println("Please enter an option number or 'exit' to leave.");
 
