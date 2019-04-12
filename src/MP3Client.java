@@ -26,6 +26,12 @@ public class MP3Client {
                 serverConnection = new Socket("localhost", 9478);
                 //serverConnection = new Socket("66.70.189.118", 9478);
 
+                try {
+                    (new File("savedSongs")).mkdirs();
+                } catch (Exception e) {
+                    System.out.println("Couldn't make savedSongs directory!");
+                }
+
                 outServer = new ObjectOutputStream(serverConnection.getOutputStream());
                 outServer.flush();
 
@@ -206,18 +212,18 @@ final class ResponseListener implements Runnable {
                             int offset = 0;
 
                             do {
-
                                 fromServer = ois.readObject();
 
                                 if (fromServer != null) {
                                     //System.out.println(offset);
+                                    System.out.println("Received Message: " + offset / 1000);
                                     SongDataMessage dataMessage = (SongDataMessage) fromServer;
                                     System.arraycopy(dataMessage.getData(), 0, songBytes , offset,
                                             Math.min(1000, songBytes.length - offset));
                                     offset += 1000;
                                 }
 
-                            } while (fromServer != null);
+                            } while (fromServer != null && offset < songBytes.length);
 
                             this.writeByteArrayToFile(songBytes, filename);
                         } else {
@@ -234,7 +240,6 @@ final class ResponseListener implements Runnable {
                         Object fromServer;
 
                         do {
-
                             fromServer = ois.readObject();
 
                             if (fromServer != null) {
@@ -271,25 +276,11 @@ final class ResponseListener implements Runnable {
         FileOutputStream fos = null;
 
         try {
-
             //File file = new File(fileName);
             fos = new FileOutputStream(fileName, true);
 
-            //FileWriter fw = new FileWriter(file);
-            //bw = new BufferedWriter(fw);
-
-            //TODO: not sure if this is right
-            //create loop to write song bytes
-            /*
-            if (songBytes.length > 0) {
-                for (int i = 0; i < fileName.length(); i++) {
-                    fos.write(songBytes[i]);
-                    fos.flush();
-                }
-
-            }
-            */
             fos.write(songBytes);
+            fos.flush();
             fos.close();
 
         }
