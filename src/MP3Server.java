@@ -49,15 +49,9 @@ public class MP3Server {
             System.out.println("    Starting Client Handler");
 
             new Thread(clientHandler).start();
-
         }
-
-
-
     }
-
 }
-
 
 /**
  * Class - ClientHandler

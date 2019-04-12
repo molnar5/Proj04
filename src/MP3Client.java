@@ -23,7 +23,7 @@ public class MP3Client {
 
         try {
             while (true) {
-                serverConnection = new Socket("localhost", 9478);
+                serverConnection = new Socket("10.192.31.224", 9478);
                 //serverConnection = new Socket("66.70.189.118", 9478);
 
                 outServer = new ObjectOutputStream(serverConnection.getOutputStream());
@@ -44,12 +44,11 @@ public class MP3Client {
                 if (scan.hasNextLine()) {
                     response = scan.nextLine();
                 } else {
-                    System.out.println("<Lost the connection with the server>");
 
+                    System.out.println("<Lost the connection with the server>");
                     return;
                 } //end if
 
-                //System.out.printf("Response from the server: %s\n", response);
 
                 if (response == null) {
                     //response invalid
@@ -116,7 +115,6 @@ public class MP3Client {
 
             scan.close();
 
-
         } catch (IOException e) {
             System.out.println("A file input/output exception occurred");
 
@@ -133,7 +131,6 @@ public class MP3Client {
     }
 }
 
-
 /**
  * This class implements Runnable, and will contain the logic for listening for
  * server responses. The threads you create in MP3Server will be constructed using
@@ -145,7 +142,6 @@ final class ResponseListener implements Runnable {
 
     public ResponseListener(Socket clientSocket) throws IOException {
         //This constructor takes in a socket and builds the ObjectInputStream with it.
-
         try {
             ois = new ObjectInputStream(clientSocket.getInputStream());
         } catch (IOException f) {
