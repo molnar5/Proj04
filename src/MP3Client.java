@@ -41,7 +41,7 @@ public class MP3Client {
                 System.out.println("(1) See list of available songs");
                 System.out.println("(2) Request song download");
                 System.out.println(" *  Exit");
-                System.out.println("=================================");
+                System.out.printf("=================================\n\n");
 
                 System.out.println("Please enter an option number or 'exit' to leave.");
 
