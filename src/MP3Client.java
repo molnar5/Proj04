@@ -285,11 +285,9 @@ final class ResponseListener implements Runnable {
             fos.flush();
             fos.close();
 
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
-        }
-        finally {
+        } finally {
             try {
                 if (fos != null) {
                     fos.close();
