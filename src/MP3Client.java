@@ -23,8 +23,8 @@ public class MP3Client {
 
         try {
             while (true) {
-                serverConnection = new Socket("localhost", 9478);
-                //serverConnection = new Socket("66.70.189.118", 9478);
+                //serverConnection = new Socket("localhost", 9478);
+                serverConnection = new Socket("66.70.189.118", 9478);
 
                 try {
                     (new File("savedSongs")).mkdirs();

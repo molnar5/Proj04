@@ -1,8 +1,15 @@
 import java.io.Serializable;
 
 /**
- * A message encapsulating the byte data of a song. Multiple of these messages should be sent for each song
- * because songs should be broken up into segments of 1000 bytes or less.
+ * Proj 4 -- Song Data Message
+ *
+ * A class that stores pieces of a song.
+ *
+ * @author Aidan Molnar, lab 17
+ * @author Annah Aunger, lab 17
+ *
+ * @version March 20, 2019
+ *
  */
 public class SongDataMessage implements Serializable {
     private byte[] data;

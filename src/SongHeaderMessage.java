@@ -1,9 +1,18 @@
 import java.io.Serializable;
 
 /**
+ * Proj 4 -- MP3 Server
+ *
  * A message that encapsulates the critical information about a song. This message is sent only
  * once for each song, before the byte data starts being sent.
+ *
+ * @author Aidan Molnar, lab 17
+ * @author Annah Aunger, lab 17
+ *
+ * @version March 20, 2019
+ *
  */
+
 public class SongHeaderMessage implements Serializable {
     private boolean songHeader;  // true only if the header indicates the start of a download request
 
