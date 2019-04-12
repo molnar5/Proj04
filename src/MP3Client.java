@@ -23,8 +23,14 @@ public class MP3Client {
 
         try {
             while (true) {
-                serverConnection = new Socket("10.192.31.224", 9478);
+                serverConnection = new Socket("localhost", 9478);
                 //serverConnection = new Socket("66.70.189.118", 9478);
+
+                try {
+                    (new File("savedSongs")).mkdirs();
+                } catch (Exception e) {
+                    System.out.println("Couldn't make savedSongs directory!");
+                }
 
                 outServer = new ObjectOutputStream(serverConnection.getOutputStream());
                 outServer.flush();
@@ -44,11 +50,12 @@ public class MP3Client {
                 if (scan.hasNextLine()) {
                     response = scan.nextLine();
                 } else {
-
                     System.out.println("<Lost the connection with the server>");
+
                     return;
                 } //end if
 
+                //System.out.printf("Response from the server: %s\n", response);
 
                 if (response == null) {
                     //response invalid
@@ -115,6 +122,7 @@ public class MP3Client {
 
             scan.close();
 
+
         } catch (IOException e) {
             System.out.println("A file input/output exception occurred");
 
@@ -131,6 +139,7 @@ public class MP3Client {
     }
 }
 
+
 /**
  * This class implements Runnable, and will contain the logic for listening for
  * server responses. The threads you create in MP3Server will be constructed using
@@ -142,6 +151,14 @@ final class ResponseListener implements Runnable {
 
     public ResponseListener(Socket clientSocket) throws IOException {
         //This constructor takes in a socket and builds the ObjectInputStream with it.
+
+        /*
+        if (clientSocket == null) {
+            throw new IllegalArgumentException("clientSocket argument is null");
+        } else {
+            ois = new ObjectInputStream(clientSocket.getInputStream());
+        }
+        */
         try {
             ois = new ObjectInputStream(clientSocket.getInputStream());
         } catch (IOException f) {
@@ -158,6 +175,7 @@ final class ResponseListener implements Runnable {
      * properly named file.
      */
     public void run() {
+        //TODO: Implement run
 
         //This is the only method, you will need to implement in this class.
         // Simply put, you will need to read in the first object you get as a
@@ -194,18 +212,18 @@ final class ResponseListener implements Runnable {
                             int offset = 0;
 
                             do {
-
                                 fromServer = ois.readObject();
 
                                 if (fromServer != null) {
                                     //System.out.println(offset);
+                                    System.out.println("Received Message: " + offset / 1000);
                                     SongDataMessage dataMessage = (SongDataMessage) fromServer;
                                     System.arraycopy(dataMessage.getData(), 0, songBytes , offset,
                                             Math.min(1000, songBytes.length - offset));
                                     offset += 1000;
                                 }
 
-                            } while (fromServer != null);
+                            } while (fromServer != null && offset < songBytes.length);
 
                             this.writeByteArrayToFile(songBytes, filename);
                         } else {
@@ -221,8 +239,7 @@ final class ResponseListener implements Runnable {
                         // properly named file.
                         Object fromServer;
 
-                        do { // make sure that ALL the strings are printed
-
+                        do {
                             fromServer = ois.readObject();
 
                             if (fromServer != null) {
@@ -230,12 +247,14 @@ final class ResponseListener implements Runnable {
                             }
                         } while (fromServer != null);
 
+                        // TODO: how to make sure that ALL the strings are printed
                     }
                     break;
 
                 } else {
-                    // this is not a songHeaderObject
+                    //TODO: this is not a songHeaderObject... what to do now?
 
+                    // I dunno
                     System.out.println("Server did not send a header...");
                     break;
                 }
@@ -257,7 +276,7 @@ final class ResponseListener implements Runnable {
         FileOutputStream fos = null;
 
         try {
-
+            //File file = new File(fileName);
             fos = new FileOutputStream(fileName, true);
 
             fos.write(songBytes);
