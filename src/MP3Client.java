@@ -146,13 +146,6 @@ final class ResponseListener implements Runnable {
     public ResponseListener(Socket clientSocket) throws IOException {
         //This constructor takes in a socket and builds the ObjectInputStream with it.
 
-        /*
-        if (clientSocket == null) {
-            throw new IllegalArgumentException("clientSocket argument is null");
-        } else {
-            ois = new ObjectInputStream(clientSocket.getInputStream());
-        }
-        */
         try {
             ois = new ObjectInputStream(clientSocket.getInputStream());
         } catch (IOException f) {
