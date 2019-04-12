@@ -23,7 +23,7 @@ public class MP3Client {
 
         try {
             while (true) {
-                serverConnection = new Socket("localhost", 9478);
+                serverConnection = new Socket("10.192.31.224", 9478);
                 //serverConnection = new Socket("66.70.189.118", 9478);
 
                 try {
@@ -103,9 +103,11 @@ public class MP3Client {
 
                     try {
                         t.join();
+                        System.out.println("Download Successful!");
                     } catch (InterruptedException e) {
                         System.out.println("Thread Join Interrupted");
                     }
+
 
                 } else if (response.equalsIgnoreCase("exit")) {
                     // stop the program
