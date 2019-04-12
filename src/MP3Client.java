@@ -9,8 +9,17 @@ import java.lang.*;
 import java.util.concurrent.TimeUnit;
 
 /**
- * An MP3 Client to request .mp3 files from a server and receive them over the socket connection.
+ * Proj 4 -- MP3 Server
+ *
+ * A class that creates a server for mp3 files.
+ *
+ * @author Aidan Molnar, lab 17
+ * @author Annah Aunger, lab 17
+ *
+ * @version April 11, 2019
+ *
  */
+
 public class MP3Client {
 
     public static void main(String[] args) {
@@ -135,9 +144,21 @@ public class MP3Client {
 }
 
 /**
+ *
+ */
+
+/**
+ * Proj 4 -- MP3 Server
+ *
  * This class implements Runnable, and will contain the logic for listening for
  * server responses. The threads you create in MP3Server will be constructed using
  * instances of this class.
+ *
+ * @author Aidan Molnar, lab 17
+ * @author Annah Aunger, lab 17
+ *
+ * @version April 11, 2019
+ *
  */
 final class ResponseListener implements Runnable {
 
@@ -178,7 +199,7 @@ final class ResponseListener implements Runnable {
 
                 if (header == null) {
 
-                } else if (header instanceof SongHeaderMessage){
+                } else if (header instanceof SongHeaderMessage) {
                     if ((header).isSongHeader()) { // is is a download request
 
                         if ((header).getFileSize() != -1) { //there are bytes to be written

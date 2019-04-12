@@ -43,5 +43,7 @@ public class SongHeaderMessage implements Serializable {
         return fileSize;
     }
 
-    public boolean isSongHeader(){return songHeader;}
+    public boolean isSongHeader() {
+        return songHeader;
+    }
 }

@@ -115,7 +115,7 @@ final class ClientHandler implements Runnable {
 
                 String fileName = artistName + " - " + songName + ".mp3";  // Formats song data into file name
 
-                System.out.println("    Client Requested: <" + fileName +">");
+                System.out.println("    Client Requested: <" + fileName + ">");
 
                 if (fileInRecord(fileName)) {
                     System.out.println("    File in Record!");
@@ -279,7 +279,7 @@ final class ClientHandler implements Runnable {
 
             while (s.hasNextLine()) {
                 lineParts = s.nextLine().split(" - ");
-                message = "\"" + lineParts[1].replace(".mp3","") + "\" By: " + lineParts[0];
+                message = "\"" + lineParts[1].replace(".mp3", "") + "\" By: " + lineParts[0];
                 System.out.println("Sending " + message);
                 outputStream.writeObject(message);
                 outputStream.flush();
